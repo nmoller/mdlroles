@@ -38,33 +38,32 @@ EOF;
     die;
 }
 
+/**
+ * On obtient le premier valeur pour après avoir filtré $array par la fonction $callback
+ * @param $array
+ * @param $callback
+ * @return mixed
+ */
+function filterArray($array, $callback) {
+    return array_values(
+        array_filter(
+            $array,
+            $callback
+        )
+    )[0];
+}
+
 $userId =3;
 $courseId = 2;
 $t = enrol_get_plugin('manual');
 $enrol_methods = enrol_get_instances($courseId, true);
-$manual_instance = array_values(
-        array_filter(
-            $enrol_methods,
-            function($method){ return $method->enrol === 'manual';}
-        )
-    )[0];
+$manual_instance = filterArray($enrol_methods, function($method){ return $method->enrol === 'manual';});
 $course_ctx = context_course::instance($courseId);
 
 $roles = get_all_roles($course_ctx);
 
-$teacher_role = array_values(
-        array_filter(
-            $roles,
-            function($role){ return $role->shortname === 'editingteacher';}
-        )
-    )[0];
-
+$teacher_role = filterArray($roles, function($role){ return $role->shortname === 'editingteacher';});
 $t->enrol_user($manual_instance, $userId, $teacher_role->id);
 // Ajouter en suite l'autre rôle
-$another_role = array_values(
-        array_filter(
-            $roles,
-            function($role){ return $role->shortname === 'teacher';}
-        )
-    )[0];
+$another_role = filterArray($roles, function($role){ return $role->shortname === 'teacher';});
 role_assign($another_role->id, $userId, $course_ctx, '', NULL);
